@@ -6,6 +6,8 @@
 	<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
 	<script src="js/jquery-3.1.0.min.js"></script>
 	<script src="js/leaflet.draw.js"></script>
+	<script src="http://cdn-geoweb.s3.amazonaws.com/terraformer/1.0.5/terraformer.min.js"></script>
+	<script src="http://cdn-geoweb.s3.amazonaws.com/terraformer-wkt-parser/1.1.0/terraformer-wkt-parser.min.js"></script>
 	<style>
 		#map{ height: 100% }
 	</style>
@@ -14,101 +16,6 @@
 
 	<div id="map"></div>
 
-	<script>
-
-	// initialize the map
-	var map = L.map('map').setView([33.55, -7.48], 10);
-	var polygonsLayer;
-
-	// load a tile layer
-	L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-		{
-			attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
-			maxZoom: 17,
-			minZoom: 9
-		}).addTo(map);
-
-	// load GeoJSON from an external file
-	/*$.getJSON("Maps/Microzones.geojson",function(data){
-		// add GeoJSON layer to the map once the file is loaded
-		polygonsLayer = L.geoJson(data,{
-			onEachFeature: function( feature, layer ){
-				layer.bindPopup( "<strong>" + feature.properties.name + "</strong><br/>" + feature.properties.arrondissement )
-			}
-		}).addTo(map);
-	});*/
-
-	var rootUrl = 'http://localhost:8080/geoserver/wfs';
-
-	var defaultParameters = {
-		service: 'WFS',
-		version: '2.0.0',
-		request: 'GetFeature',
-		typeName: 'afriquia_gaz:microzones',
-		maxFeatures: 200,
-		outputFormat: 'text/javascript',
-		format_options: 'callback: getJson',
-		srsName:'EPSG:4326'
-
-	};
-
-	var parameters = L.Util.extend(defaultParameters);
-	//console.log(rootUrl + L.Util.getParamString(parameters));
-	$.ajax({
-		jsonp : false,
-		url: rootUrl + L.Util.getParamString(parameters),
-		dataType: 'jsonp',
-		jsonpCallback: 'getJson',
-		success: handleJson
-	});
-
-	var group = new L.featureGroup().addTo(map);
-	var geojsonlayer;
-	function handleJson(data) {
-		//		console.log(data);
-		geojsonlayer=L.geoJson(data, {
-			onEachFeature: function (feature, my_Layer) {
-				my_Layer.bindPopup("ID : "+feature.properties.id+"<br />Name : "+feature.properties.microzone);
-			}
-		}).addTo(group);
-		map.fitBounds(group.getBounds());
-	}
-
-
-	function getJson(data) {
-		console.log("callback function fired");
-	}
-
-	// Initialize the FeatureGroup to store editable layers
-	var drawnItems = new L.FeatureGroup();
-	map.addLayer(drawnItems);
-
-	// Initialize the draw control and pass it the FeatureGroup of editable layers
-	var drawControl = new L.Control.Draw({
-		edit: {
-				featureGroup: drawnItems
-		}
-	});
-	map.addControl(drawControl);
-
-	map.on('draw:created', function (e) {
-		var type = e.layerType,
-				layer = e.layer;
-		if (type === 'marker') {
-				// Do marker specific actions
-		}
-		// Do whatever else you need to. (save to db, add to map etc)
-		drawnItems.addLayer(layer);
-	});
-
-	map.on('draw:edited', function () {
-		// Update db to save latest changes.
-	});
-
-	map.on('draw:deleted', function () {
-		// Update db to save latest changes.
-	});
-
-	</script>
+	<script src="js/map.js"></script>
 </body>
 </html>
