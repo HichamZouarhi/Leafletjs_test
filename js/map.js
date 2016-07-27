@@ -46,6 +46,7 @@
 
 	var group = new L.featureGroup().addTo(map);
 	var geojsonlayer;
+	var selectedFeature = null;
 	function handleJson(data) {
 		//		console.log(data);
 		geojsonlayer=L.geoJson(data, {
@@ -55,8 +56,18 @@
 					"opacity": 0.65
 				};
 			},
-			onEachFeature: function (feature, my_Layer) {
-				my_Layer.bindPopup("ID : "+feature.properties.id+"<br />Name : "+feature.properties.microzone);
+			onEachFeature: function (feature, layer) {
+				layer.bindPopup("ID : "+feature.properties.id+"<br />Name : "+feature.properties.microzone);
+				
+				layer.on('click', function(e){
+					drawnItems.addLayer(e.target);
+					if(selectedFeature){
+						
+						//selectedFeature.editing.disable();
+					}
+					//selectedFeature = e.target;
+					//e.target.editing.enable();
+				});
 			}
 		}).addTo(group);
 		map.fitBounds(group.getBounds());
@@ -77,7 +88,7 @@
 	// Initialize the draw control and pass it the FeatureGroup of editable layers
 	var drawControl = new L.Control.Draw({
 		edit: {
-				featureGroup: group
+				featureGroup: drawnItems
 		}
 	});
 	map.addControl(drawControl);
@@ -111,20 +122,11 @@
 
 	map.on('draw:editstart', function () {
 		// Update db to save latest changes.
-		if(geojsonlayer){
-			geojsonlayer.editing.enable();
-		}
+		
 	});
 
 	map.on('draw:editstop', function (e) {
-		// Update db to save latest changes.
-		var layers = e.layers;
-		layers.eachLayer(function (layer) {
-			layer.editing.enable();
-			var geojson = layer.toGeoJSON();
-			var wkt = Terraformer.WKT.convert(geojson.geometry);
-			console.log(wkt);
-		});
+		console.log(e.target);
 		
 	});
 
