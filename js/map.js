@@ -44,7 +44,7 @@
 		success: handleJson
 	});
 
-	var group = new L.featureGroup().addTo(map);
+	//var group = new L.featureGroup().addTo(map);
 	var geojsonlayer;
 	var selectedFeature = null;
 	function handleJson(data) {
@@ -58,20 +58,21 @@
 			},
 			onEachFeature: function (feature, layer) {
 				layer.bindPopup("ID : "+feature.properties.id+"<br />Name : "+feature.properties.microzone);
-				
+				var id=feature.properties.id;
 				layer.on('click', function(e){
-					drawnItems.addLayer(e.target);
 					if(selectedFeature){
-						
-						//selectedFeature.editing.disable();
+						selectedFeature=null;
 					}
-					//selectedFeature = e.target;
+					selectedFeature = e.target;
+					drawnItems.addLayer(selectedFeature);
+					console.log(e.target.feature.properties.id);
 					//e.target.editing.enable();
 				});
 			}
-		}).addTo(group);
-		map.fitBounds(group.getBounds());
-		console.log(geojsonlayer.toGeoJSON());
+		});
+		geojsonlayer.addTo(map);
+		map.fitBounds(geojsonlayer.getBounds());
+		//console.log(geojsonlayer.toGeoJSON());
 
 	}
 
@@ -120,14 +121,11 @@
 		drawnItems.addLayer(layer);
 	});
 
-	map.on('draw:editstart', function () {
-		// Update db to save latest changes.
-		
-	});
-
-	map.on('draw:editstop', function (e) {
-		console.log(e.target);
-		
+	map.on('draw:edited', function (e) {
+		var layers = e.layers;
+		layers.eachLayer(function (layer) {
+			console.log(layer.feature.properties.id);
+		});
 	});
 
 	map.on('draw:deleted', function () {
