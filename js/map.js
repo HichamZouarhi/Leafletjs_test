@@ -100,7 +100,7 @@
 		if (type === 'marker') {
 				// Do marker specific actions
 		}
-		/*var geojson = e.layer.toGeoJSON();
+		var geojson = e.layer.toGeoJSON();
 		var wkt = Terraformer.WKT.convert(geojson.geometry);
 		console.log(wkt);
 		$.ajax({
@@ -116,7 +116,7 @@
 			error:function(response){
 				console.log(response);
 			}
-		})*/
+		})
 		// Do whatever else you need to. (save to db, add to map etc)
 		drawnItems.addLayer(layer);
 	});
@@ -124,7 +124,27 @@
 	map.on('draw:edited', function (e) {
 		var layers = e.layers;
 		layers.eachLayer(function (layer) {
-			console.log(layer.feature.properties.id);
+			var id = layer.feature.properties.id;
+			console.log(id);
+			var geojson = layer.toGeoJSON();
+			var wkt = Terraformer.WKT.convert(geojson.geometry);
+			console.log(wkt);
+			$.ajax({
+				type: 'POST',
+				url: 'php/modifyFeature.php',
+				data: {
+					id: id,
+					geometry: wkt
+				},
+				success:function(response){
+					alert("microzone modifiée dans la base de données");
+					window.location.reload();
+					//console.log(response);
+				},
+				error:function(response){
+					console.log(response);
+				}
+			})
 		});
 	});
 
